@@ -1,0 +1,21 @@
+{
+  "name": "passbuilder",
+  "main": "src/index.tsx",
+  "compatibility_date": "2022-07-12",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "routes": [
+    {
+      "pattern": "passbuilder.davidwhy.me",
+      "custom_domain": true
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "passbuilder",
+      "database_id": "5df435c5-ef67-4137-a3fd-fa2f38a7ca58"
+    }
+  ]
+}

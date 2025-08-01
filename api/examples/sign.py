@@ -1,14 +1,15 @@
 import io
 import json
 import os
-from pathlib import Path
+import shutil
 import tempfile
 import zipfile
-import shutil
 from hashlib import sha1
-from cryptography.hazmat.primitives.serialization import pkcs7
-from cryptography.hazmat.primitives.serialization import pkcs12
+from pathlib import Path
+
 from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.serialization import pkcs7, pkcs12
+from dotenv import load_dotenv
 
 
 def _sign_pass(folder: Path, p12_data: bytes, password: bytes | None = None) -> bytes:
@@ -68,11 +69,17 @@ def sign_pass(folder: Path, p12_data: bytes, password: bytes | None = None):
 
 
 if __name__ == '__main__':
-    p12_data = (Path(__file__).parent / 'pass.p12').read_bytes()
+    load_dotenv()
+
+    PASSWORD = os.getenv('P12_PASSWORD', None)
+
+    p12_data = Path('pass.p12').read_bytes()
 
     pass_folder = Path(__file__).parent / 'Generic.pass'
 
-    signed_pass_data = sign_pass(pass_folder, p12_data)
+    signed_pass_data = sign_pass(
+        pass_folder, p12_data, password=PASSWORD.encode('utf-8') if PASSWORD else None
+    )
 
     with open('signed_pass.pkpass', 'wb') as f:
         f.write(signed_pass_data)
