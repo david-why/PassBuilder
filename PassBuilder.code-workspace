@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "api"
+		},
+		{
+			"path": "shortcut"
 		}
 	],
 	"settings": {

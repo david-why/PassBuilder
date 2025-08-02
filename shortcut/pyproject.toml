@@ -1,0 +1,12 @@
+[project]
+name = "passbuilder-shortcut"
+version = "0.1.0"
+description = "The shortcut for PassBuilder"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "workflowpy-shortcuts",
+]
+
+[tool.uv.sources]
+workflowpy-shortcuts = { path = "../../workflowpy", editable = true }
