@@ -1,7 +1,7 @@
 {
   "name": "passbuilder",
   "main": "src/index.tsx",
-  "compatibility_date": "2022-07-12",
+  "compatibility_date": "2025-07-12",
   "compatibility_flags": [
     "nodejs_compat"
   ],

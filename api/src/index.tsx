@@ -1,13 +1,21 @@
 import { Hono } from 'hono'
-import * as pkijs from 'pkijs'
-import * as asn1js from 'asn1js'
-import { pemToBuffer } from './utils/crypto'
+import { env } from 'hono/adapter'
+import forge from 'node-forge'
+// import { pemToBuffer } from './utils/crypto'
 
 interface HonoEnv {
   Bindings: Env
+  Variables: {
+    env: Env
+  }
 }
 
 const app = new Hono<HonoEnv>()
+
+app.use('*', (c, next) => {
+  c.set('env', env(c))
+  return next()
+})
 
 app.get('/', (c) => {
   return c.text('Hello, Hono!')
@@ -22,85 +30,48 @@ app.post('/sign', async (c) => {
 
   try {
     // Load private and public keys
-    const privateKeyDer = pemToBuffer(c.env.PASSKIT_PRIVATE_KEY)
-    const privateKey = await crypto.subtle.importKey(
-      'pkcs8',
-      privateKeyDer,
-      { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-1' },
-      true,
-      ['sign']
+    const privateKey = forge.pki.privateKeyFromPem(
+      c.get('env').PASSKIT_PRIVATE_KEY
     )
-    const cert = pkijs.Certificate.fromBER(
-      pemToBuffer(c.env.PASSKIT_CERTIFICATE)
-    )
-    const wwdr = pkijs.Certificate.fromBER(pemToBuffer(c.env.APPLE_WWDR_CERT))
+    const cert = forge.pki.certificateFromPem(c.get('env').PASSKIT_CERTIFICATE)
+    const wwdr = forge.pki.certificateFromPem(c.get('env').APPLE_WWDR_CERT)
 
-    // Create SignerInfo
-    const messageDigest = await crypto.subtle.digest("SHA-1", textBuffer);
-    console.log('Message digest hex:', new Uint8Array(messageDigest));
-    const signerInfo = new pkijs.SignerInfo({
-      // version: 1,
-      sid: new pkijs.IssuerAndSerialNumber({
-        issuer: cert.issuer,
-        serialNumber: cert.serialNumber,
-      }),
-      signedAttrs: new pkijs.SignedAndUnsignedAttributes({
-        type: 0,
-        attributes: [
-          new pkijs.Attribute({
-            type: '1.2.840.113549.1.9.3', // content-type
-            values: [
-              new asn1js.ObjectIdentifier({ value: '1.2.840.113549.1.7.1' }), // id-data
-            ],
-          }),
-          new pkijs.Attribute({
-            type: '1.2.840.113549.1.9.4', // message-digest
-            values: [
-              // The value will be filled in automatically by pkijs during signing
-              new asn1js.OctetString({ valueHex: messageDigest }),
-            ],
-          }),
-          new pkijs.Attribute({
-            type: '1.2.840.113549.1.9.5', // signingTime
-            values: [new asn1js.UTCTime({ valueDate: new Date() })],
-          }),
-        ],
-      }),
+    // Create signed data
+    const signedData = forge.pkcs7.createSignedData()
+    signedData.content = forge.util.createBuffer(textBuffer)
+    signedData.addCertificate(cert)
+    signedData.addCertificate(wwdr)
+    signedData.addSigner({
+      key: privateKey,
+      certificate: cert,
+      digestAlgorithm: forge.pki.oids.sha1!, // Use SHA-1 for signing
+      authenticatedAttributes: [
+        {
+          type: forge.pki.oids.contentType!,
+          value: forge.pki.oids.data!,
+        },
+        {
+          type: forge.pki.oids.messageDigest!,
+          // This will be calculated automatically
+        },
+        {
+          type: forge.pki.oids.signingTime!,
+          // This will be set automatically
+        },
+      ],
     })
+    signedData.sign({ detached: true })
 
-    // Create detached SignedData (no eContent for detached signature)
-    const signed = new pkijs.SignedData({
-      // version: 1,
-      encapContentInfo: new pkijs.EncapsulatedContentInfo({
-        eContentType: '1.2.840.113549.1.7.1', // id-data
-        // No eContent for detached signature
-      }),
-      signerInfos: [signerInfo],
-      certificates: [cert, wwdr],
-    })
-
-    // Sign with detached data
-    await signed.sign(privateKey, 0, 'SHA-1', textBuffer)
-
-    // Create ContentInfo wrapper for detached signature
-    const contentInfo = new pkijs.ContentInfo({
-      contentType: '1.2.840.113549.1.7.2', // signedData
-      content: signed.toSchema(true),
-    })
-
-    const signatureBytes = contentInfo.toSchema().toBER()
+    const signatureString = forge.asn1.toDer(signedData.toAsn1())
     console.log('Detached signature created successfully')
 
     return c.json({
       success: true,
-      signature: Array.from(new Uint8Array(signatureBytes)),
-      signatureBase64: btoa(
-        String.fromCharCode(...new Uint8Array(signatureBytes))
-      ),
+      signatureBase64: forge.util.encode64(signatureString.getBytes()),
     })
   } catch (error) {
     console.error('Signing error:', error)
-    return c.json({ error: 'Failed to sign data' }, 500)
+    return c.json({ success: false, error: 'Failed to sign data' }, 500)
   }
 })
 
