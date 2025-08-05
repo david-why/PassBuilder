@@ -2,6 +2,8 @@
 
 PassBuilder is a Siri Shortcut that lets you create custom Apple Wallet passes.
 
+![Screenshot of a shortcut using PassBuilder](assets/screenshot.png)
+
 ## Structure
 
 This project has two parts:
