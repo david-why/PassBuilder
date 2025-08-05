@@ -13,12 +13,13 @@ This project has two parts:
 
 ## Usage
 
-1. Install [the shortcut](https://github.com/david-why/PassBuilder/raw/refs/heads/main/shortcut/PassBuilder.shortcut). This can't be executed directly; you need to create your own shortcut to use it.
-2. Either [install this example shortcut](https://www.icloud.com/shortcuts/3847cdc5491945d39e4565571fafdb1e) and edit the values, or create a new shortcut, and put the following actions:
+1. Install [the Actions app](https://apps.apple.com/us/app/actions/id1586435171), which contains useful Shortcuts actions used by PassBuilder.
+2. Install [the shortcut](https://github.com/david-why/PassBuilder/raw/refs/heads/main/shortcut/PassBuilder.shortcut). This can't be executed directly; you need to create your own shortcut to use it.
+3. Either [install this example shortcut](https://www.icloud.com/shortcuts/3847cdc5491945d39e4565571fafdb1e) and edit the values, or create a new shortcut, and put the following actions:
    1. Text: Put the JSON content of your pass here. The format is described later.
    2. Run Shortcut: Choose the `PassBuilder` shortcut you installed earlier, and set the input to the Text variable from the first action.
    3. Save File: Save the pass you created to a file. (On iOS, the saved file can't be opened directly. See below for a workaround. The example shortcut already does this.)
-3. Run the shortcut to create the pass.
+4. Run the shortcut to create the pass.
 
 ## JSON Content Format
 
