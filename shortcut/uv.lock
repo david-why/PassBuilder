@@ -12,6 +12,17 @@ wheels = [
 ]
 
 [[package]]
+name = "passbuilder-shortcut"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "workflowpy-shortcuts" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "workflowpy-shortcuts", editable = "../../workflowpy" }]
+
+[[package]]
 name = "pydantic"
 version = "2.11.7"
 source = { registry = "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple" }
@@ -53,17 +64,6 @@ wheels = [
     { url = "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/packages/f1/3d/847b6b1fed9f8ed3bb95a9ad04fbd0b212e832d4f0f50ff4d9ee5a9f15cf/pydantic_core-2.33.2-cp313-cp313t-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:95237e53bb015f67b63c91af7518a62a8660376a6a0db19b89acc77a4d6199f5", size = 1981560, upload-time = "2025-04-23T18:32:22.354Z" },
     { url = "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/packages/6f/9a/e73262f6c6656262b5fdd723ad90f518f579b7bc8622e43a942eec53c938/pydantic_core-2.33.2-cp313-cp313t-win_amd64.whl", hash = "sha256:c2fc0a768ef76c15ab9238afa6da7f69895bb5d1ee83aeea2e3509af4472d0b9", size = 1935777, upload-time = "2025-04-23T18:32:25.088Z" },
 ]
-
-[[package]]
-name = "shortcut"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "workflowpy-shortcuts" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "workflowpy-shortcuts", editable = "../../workflowpy" }]
 
 [[package]]
 name = "typing-extensions"
